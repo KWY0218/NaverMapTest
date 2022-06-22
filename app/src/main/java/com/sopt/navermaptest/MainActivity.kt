@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.chip.Chip
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapView
@@ -56,10 +57,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             if (marker.infoWindow == null) {
                 val data = viewModel.testHashMap[marker.captionText]!!
                 // 현재 마커에 정보 창이 열려있지 않을 경우 엶
+                binding.detailTagCg.removeAllViews()
                 binding.detailName.text = data.name
                 binding.detailStarTv.text = "%.1f".format(data.star)
                 binding.detailMainMenuTv.text = "대표음식: ${data.representativeMenu}"
                 binding.mainDetailCl.visibility = View.VISIBLE
+                data.tagList.forEach {
+                    val chip = Chip(this)
+                    chip.text = it
+                    binding.detailTagCg.addView(chip)
+                }
                 binding.detailBookmarkImg.setOnClickListener { it.isSelected = !it.isSelected }
             } else {
                 // 이미 현재 마커에 정보 창이 열려있을 경우 닫음
@@ -75,7 +82,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 captionText = data.name
                 icon = OverlayImage.fromResource(R.drawable.ic_place)
                 iconTintColor =
-                    if (data.isColor) resources.getColor(R.color.orange) else Color.GREEN
+                    if (data.isColor) Color.parseColor("#F19F37") else Color.GREEN
+
                 onClickListener = listener
             }
         }

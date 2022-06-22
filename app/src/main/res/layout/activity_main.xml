@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/grey"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:padding="4dp"
@@ -54,6 +54,15 @@
             app:layout_constraintBottom_toBottomOf="@+id/detail_name"
             app:layout_constraintStart_toEndOf="@+id/detail_name"
             app:layout_constraintTop_toTopOf="@+id/detail_name" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/detail_tag_cg"
+            android:layout_width="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/detail_img"
+            app:layout_constraintTop_toBottomOf="@+id/detail_name" />
 
         <TextView
             android:id="@+id/detail_star_tv"
@@ -94,7 +103,7 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/detail_img"
-            app:layout_constraintTop_toBottomOf="@+id/detail_name"
+            app:layout_constraintTop_toBottomOf="@+id/detail_tag_cg"
             tools:text="대표 메뉴: 라라라" />
 
         <TextView
