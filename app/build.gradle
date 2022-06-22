@@ -3,6 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 android {
     compileSdk 32
 
@@ -14,6 +17,9 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        resValue("string","NAVER_KEY",properties.getProperty("naver_key"))
+        manifestPlaceholders = [naver_key:"${properties.getProperty('naver_key')}"]
     }
 
     buildTypes {
@@ -36,6 +42,7 @@ android {
 }
 
 dependencies {
+    implementation "androidx.fragment:fragment-ktx:1.4.1"
     // 네이버 지도 SDK
     implementation 'com.naver.maps:map-sdk:3.15.0'
 

@@ -1,8 +1,10 @@
 package com.sopt.navermaptest
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.LocationTrackingMode
@@ -17,23 +19,25 @@ import com.sopt.navermaptest.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var locationSource1: FusedLocationSource
+    private lateinit var currentlocationSource: FusedLocationSource
     private lateinit var mapView: MapView
     private lateinit var naverMap: NaverMap
+    private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapView = binding.naverMapView
-        locationSource1 = FusedLocationSource(this, 1000)
+        currentlocationSource = FusedLocationSource(this, 1000)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onMapReady(p0: NaverMap) {
         naverMap = p0.apply {
-            locationSource = locationSource1
+            locationSource = currentlocationSource
             minZoom = 11.0
             maxZoom = 16.0
             uiSettings.apply {
@@ -42,35 +46,39 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 isLocationButtonEnabled = true
                 isLogoClickEnabled = false
             }
+            setOnMapClickListener { _, _ ->
+                binding.mainDetailCl.visibility = View.GONE
+            }
         }
 
-        val marker1 = Marker()
-        val marker2 = Marker()
         val listener = Overlay.OnClickListener { overlay ->
             val marker = overlay as Marker
-
             if (marker.infoWindow == null) {
+                val data = viewModel.testHashMap[marker.captionText]!!
                 // 현재 마커에 정보 창이 열려있지 않을 경우 엶
-                binding.detailText.text = marker.captionText
+                binding.detailName.text = data.name
+                binding.detailStarTv.text = "%.1f".format(data.star)
+                binding.detailMainMenuTv.text = "대표음식: ${data.representativeMenu}"
                 binding.mainDetailCl.visibility = View.VISIBLE
+                binding.detailBookmarkImg.setOnClickListener { it.isSelected = !it.isSelected }
             } else {
                 // 이미 현재 마커에 정보 창이 열려있을 경우 닫음
-                binding.mainDetailCl.visibility = View.INVISIBLE
+                binding.mainDetailCl.visibility = View.GONE
             }
-
             true
         }
-        marker1.position = LatLng(36.7637, 127.285)
-        marker2.position = LatLng(36.7683, 127.2838)
-        marker1.map = naverMap
-        marker2.map = naverMap
-        marker1.captionText = "초원"
-        marker2.captionText = "기좋뷔"
-        marker1.icon = OverlayImage.fromResource(R.drawable.ic_place)
-        marker2.icon = OverlayImage.fromResource(R.drawable.ic_place)
-        marker1.iconTintColor = Color.BLUE
-        marker1.onClickListener = listener
-        marker2.onClickListener = listener
+
+        viewModel.test.forEach { data ->
+            Marker().apply {
+                position = LatLng(data.latitude, data.longitude)
+                map = naverMap
+                captionText = data.name
+                icon = OverlayImage.fromResource(R.drawable.ic_place)
+                iconTintColor =
+                    if (data.isColor) resources.getColor(R.color.orange) else Color.GREEN
+                onClickListener = listener
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -78,8 +86,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-        if (locationSource1.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
-            if (!locationSource1.isActivated) { // 권한 거부됨
+        if (currentlocationSource.onRequestPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+            )
+        ) {
+            if (!currentlocationSource.isActivated) { // 권한 거부됨
                 naverMap.locationTrackingMode = LocationTrackingMode.None
                 return
             } else {
