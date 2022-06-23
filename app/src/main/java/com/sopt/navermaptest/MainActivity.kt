@@ -1,11 +1,11 @@
 package com.sopt.navermaptest
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.LocationTrackingMode
@@ -30,12 +30,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mapView = binding.naverMapView
-        currentlocationSource = FusedLocationSource(this, 1000)
+        currentlocationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
+
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onMapReady(p0: NaverMap) {
         naverMap = p0.apply {
             locationSource = currentlocationSource
@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 isLocationButtonEnabled = true
                 isLogoClickEnabled = false
             }
+            locationTrackingMode = LocationTrackingMode.Follow
             setOnMapClickListener { _, _ ->
                 binding.mainDetailCl.visibility = View.GONE
             }
@@ -56,11 +57,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             val marker = overlay as Marker
             if (marker.infoWindow == null) {
                 val data = viewModel.testHashMap[marker.captionText]!!
-                // 현재 마커에 정보 창이 열려있지 않을 경우 엶
+                val starNum = "%.1f".format(data.star)
+                val mainMenu = "대표음식: ${data.representativeMenu}"
+
                 binding.detailTagCg.removeAllViews()
                 binding.detailName.text = data.name
-                binding.detailStarTv.text = "%.1f".format(data.star)
-                binding.detailMainMenuTv.text = "대표음식: ${data.representativeMenu}"
+                binding.detailStarTv.text = starNum
+                binding.detailMainMenuTv.text = mainMenu
                 binding.mainDetailCl.visibility = View.VISIBLE
                 data.tagList.forEach {
                     val chip = Chip(this)
@@ -80,10 +83,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 position = LatLng(data.latitude, data.longitude)
                 map = naverMap
                 captionText = data.name
-                icon = OverlayImage.fromResource(R.drawable.ic_place)
+                icon = OverlayImage.fromResource(R.drawable.ic_baseline_place_24)
                 iconTintColor =
-                    if (data.isColor) Color.parseColor("#F19F37") else Color.GREEN
-
+                    if (data.isColor) ContextCompat.getColor(
+                        this@MainActivity,
+                        R.color.orange
+                    ) else Color.GREEN
                 onClickListener = listener
             }
         }
@@ -104,7 +109,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 naverMap.locationTrackingMode = LocationTrackingMode.None
                 return
             } else {
-                naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
+                naverMap.locationTrackingMode = LocationTrackingMode.Follow
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -143,5 +148,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
+    }
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 }
