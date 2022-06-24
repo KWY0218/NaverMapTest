@@ -58,8 +58,6 @@ repositories {
 <application
 	...
 	android:name=".App"
-	tools:replace="android:appComponentFactory"
-	android:appComponentFactory="whateverString"
 	...>
 
 	<meta-data
@@ -69,16 +67,18 @@ repositories {
 ```
 
 - 사용자 권한
-- 오류 해결을 위한 2개 정의
 - meta-data에 client id 등록
 
 ### local properties gradle
 
-```xml
+```kotlin
+android.useAndroidX=true
 android.enableJetifier=true
 ```
 
-- 오류 해결을 위한 정의
+- Manifest 병합 오류 해결을 위해 등록
+
+*과거 안드로이드에서 자주 사용된 support library를 사용하는 써드 파티 라이브러리를 우리가 개발하는 AndroidX 프로젝트와 호환되도록 돕는 툴이다.*
 
 ### Application 등록
 
