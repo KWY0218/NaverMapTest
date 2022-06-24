@@ -33,7 +33,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         currentlocationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
-
     }
 
     override fun onMapReady(p0: NaverMap) {
